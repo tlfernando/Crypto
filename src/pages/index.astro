@@ -146,8 +146,8 @@ const fiatCurrencies = [
     <script>
       const form = document.getElementById("cryptoForm") as HTMLFormElement;
       const status = document.getElementById("status");
-      // RECUERDA: Cambia esto por tu Webhook de n8n
-      const WEBHOOK_URL = "TU_WEBHOOK_AQUI";
+      const WEBHOOK_URL =
+        "https://epimeric-cleansable-miah.ngrok-free.dev/webhook/cotizacion-crypto";
 
       form.addEventListener("submit", async (e) => {
         e.preventDefault();
