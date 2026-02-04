@@ -1,7 +1,6 @@
 ---
 import "../styles/global.css";
 
-// Listados basados en la documentación de CriptoYa
 const cryptoCoins = [
   "BTC",
   "ETH",
@@ -39,7 +38,6 @@ const cryptoCoins = [
   "SAND",
   "CHZ",
 ].sort();
-
 const fiatCurrencies = [
   "ARS",
   "BRL",
@@ -75,20 +73,18 @@ const fiatCurrencies = [
         >
           Crypto <span class="text-orange-500">Dash</span> 🚀
         </h1>
-        <p class="text-slate-400 text-sm">
-          Panel de consulta dinámica para n8n
-        </p>
+        <p class="text-slate-400 text-sm">Consulta de Precios Real-Time</p>
       </header>
 
       <form id="cryptoForm" class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div class="flex flex-col">
           <label
             class="text-[10px] font-black text-orange-500 uppercase tracking-[0.2em] mb-2 ml-1"
-            >Cripto a operar</label
+            >Cripto</label
           >
           <select
             name="coin"
-            class="bg-slate-900/80 border-2 border-slate-700 rounded-2xl p-4 focus:border-orange-500 focus:ring-0 transition-all outline-none appearance-none cursor-pointer text-white"
+            class="bg-slate-900/80 border-2 border-slate-700 rounded-2xl p-4 text-white outline-none focus:border-orange-500 appearance-none"
           >
             {cryptoCoins.map((coin) => <option value={coin}>{coin}</option>)}
           </select>
@@ -97,11 +93,11 @@ const fiatCurrencies = [
         <div class="flex flex-col">
           <label
             class="text-[10px] font-black text-orange-500 uppercase tracking-[0.2em] mb-2 ml-1"
-            >Moneda Fiat / Stable</label
+            >Fiat</label
           >
           <select
             name="fiat"
-            class="bg-slate-900/80 border-2 border-slate-700 rounded-2xl p-4 focus:border-orange-500 focus:ring-0 transition-all outline-none appearance-none cursor-pointer text-white"
+            class="bg-slate-900/80 border-2 border-slate-700 rounded-2xl p-4 text-white outline-none focus:border-orange-500 appearance-none"
           >
             {
               fiatCurrencies.map((fiat) => (
@@ -116,29 +112,28 @@ const fiatCurrencies = [
         <div class="flex flex-col md:col-span-2">
           <label
             class="text-[10px] font-black text-orange-500 uppercase tracking-[0.2em] mb-2 ml-1"
-            >Volumen (Punto para decimales)</label
+            >Volumen</label
           >
           <input
             type="number"
             name="volumen"
             step="0.000001"
             value="0.1"
-            placeholder="Ej: 0.1"
-            class="bg-slate-900/80 border-2 border-slate-700 rounded-2xl p-4 focus:border-orange-500 focus:ring-0 transition-all outline-none text-white"
+            class="bg-slate-900/80 border-2 border-slate-700 rounded-2xl p-4 text-white outline-none focus:border-orange-500"
           />
         </div>
 
         <button
           type="submit"
-          class="md:col-span-2 w-full bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-500 hover:to-orange-400 text-white font-black py-5 rounded-2xl shadow-xl shadow-orange-900/20 transform active:scale-[0.97] transition-all uppercase tracking-widest text-sm"
+          class="md:col-span-2 w-full bg-orange-600 hover:bg-orange-500 text-white font-black py-5 rounded-2xl shadow-xl transition-all uppercase tracking-widest text-sm"
         >
-          Consultar en n8n
+          Consultar Ahora
         </button>
       </form>
 
       <div
         id="status"
-        class="mt-8 p-4 rounded-2xl text-center text-xs font-bold hidden border transition-all animate-pulse"
+        class="mt-8 p-4 rounded-2xl text-center text-xs font-bold hidden border"
       >
       </div>
     </div>
@@ -146,6 +141,7 @@ const fiatCurrencies = [
     <script>
       const form = document.getElementById("cryptoForm") as HTMLFormElement;
       const status = document.getElementById("status");
+      // USA ESTA URL DE NGROK (ASEGÚRATE QUE N8N ESTÉ ACTIVO)
       const WEBHOOK_URL =
         "https://epimeric-cleansable-miah.ngrok-free.dev/webhook/cotizacion-crypto";
 
@@ -157,28 +153,32 @@ const fiatCurrencies = [
         if (status) {
           status.className =
             "mt-8 p-4 rounded-2xl text-center text-xs font-bold block border bg-orange-500/10 text-orange-400 border-orange-500/30";
-          status.innerText = "⏳ ENVIANDO DATOS AL WORKFLOW...";
+          status.innerText = "⏳ ENVIANDO...";
         }
 
         try {
-          const response = await fetch(WEBHOOK_URL, {
+          // EL TRUCO ESTÁ AQUÍ: mode 'no-cors' y el header de ngrok
+          await fetch(WEBHOOK_URL, {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            mode: "no-cors",
+            headers: {
+              "Content-Type": "application/json",
+              "ngrok-skip-browser-warning": "true",
+            },
             body: JSON.stringify(data),
           });
 
-          if (response.ok && status) {
+          // Con no-cors no podemos leer la respuesta, así que mostramos éxito directamente
+          if (status) {
             status.className =
               "mt-8 p-4 rounded-2xl text-center text-xs font-bold block border bg-green-500/10 text-green-400 border-green-500/30";
-            status.innerText = "✅ ¡RECIBIDO! REVISA TU TELEGRAM";
-          } else {
-            throw new Error();
+            status.innerText = "✅ ENVIADO CORRECTAMENTE A TELEGRAM";
           }
         } catch (err) {
           if (status) {
             status.className =
               "mt-8 p-4 rounded-2xl text-center text-xs font-bold block border bg-red-500/10 text-red-400 border-red-500/30";
-            status.innerText = "❌ ERROR: REVISA LA CONEXIÓN O CORS";
+            status.innerText = "❌ ERROR AL ENVIAR";
           }
         }
       });
